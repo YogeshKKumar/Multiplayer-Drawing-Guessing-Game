@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: drawing_game_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-drawing_game_db}
+      MYSQL_USER: ${MYSQL_USER:-gameuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gamepassword}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: drawing_game_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_NAME: "SketchSync - Multiplayer Drawing & Guessing Game"
+      APP_ENV: production
+      DEBUG: "false"
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-gameuser}:${MYSQL_PASSWORD:-gamepassword}@mysql:3306/${MYSQL_DATABASE:-drawing_game_db}
+      MIN_PLAYERS: ${MIN_PLAYERS:-2}
+      MAX_PLAYERS: ${MAX_PLAYERS:-10}
+      DEFAULT_TOTAL_ROUNDS: ${DEFAULT_TOTAL_ROUNDS:-3}
+      DEFAULT_ROUND_DURATION_SECONDS: ${DEFAULT_ROUND_DURATION_SECONDS:-60}
+      ROUND_INTERMISSION_SECONDS: ${ROUND_INTERMISSION_SECONDS:-5}
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000,http://localhost:80"
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:8000}
+    container_name: drawing_game_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  mysql_data:

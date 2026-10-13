@@ -1,0 +1,157 @@
+{
+  "info": {
+    "_postman_id": "9f6b4b38-7244-4d28-92f1-82909d55a001",
+    "name": "SketchSync - Multiplayer Drawing & Guessing Game API",
+    "description": "Postman collection for the SketchSync FastAPI REST APIs and WebSocket endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "roomCode",
+      "value": "A7K9X2",
+      "type": "string"
+    },
+    {
+      "key": "playerId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "2. Create Room",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"display_name\": \"Alice\",\n  \"total_rounds\": 3,\n  \"round_duration_seconds\": 60\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rooms",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rooms"]
+        }
+      }
+    },
+    {
+      "name": "3. Join Existing Room",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"display_name\": \"Bob\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rooms/{{roomCode}}/join",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rooms", "{{roomCode}}", "join"]
+        }
+      }
+    },
+    {
+      "name": "4. Get Room Information",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/rooms/{{roomCode}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rooms", "{{roomCode}}"]
+        }
+      }
+    },
+    {
+      "name": "5. Leave Room",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"player_id\": {{playerId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rooms/{{roomCode}}/leave",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rooms", "{{roomCode}}", "leave"]
+        }
+      }
+    },
+    {
+      "name": "6. Get Completed Game History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/games/history?limit=20&include_active=false",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "games", "history"],
+          "query": [
+            { "key": "limit", "value": "20" },
+            { "key": "include_active", "value": "false" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Get Leaderboard",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/leaderboard?limit=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "leaderboard"],
+          "query": [
+            { "key": "limit", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Get Player Statistics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/players/stats/Alice",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "players", "stats", "Alice"]
+        }
+      }
+    }
+  ]
+}
